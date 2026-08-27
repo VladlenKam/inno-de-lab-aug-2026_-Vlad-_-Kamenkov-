@@ -13,7 +13,7 @@ GROUP BY p.product_name
 ORDER BY total_revenue DESC
 LIMIT 5;
 
-3. Продажи по городам (из каких городов приходит больше всего заказов)
+3. Продажи по городам (сумма продаж в разрезе городов)
 SELECT c.city, SUM(f.total) AS total_sales
 FROM fact_sales f
 JOIN dim_customer c ON f.customer_sk = c.customer_sk
