@@ -1,6 +1,17 @@
 DEFAULT_RETURN_INDEX_BASE = 10.0
 
-def calculate_overdue_fine(film_name: str, days_overdue, fine_rate: float) -> tuple[float, float]:
+def calculate_overdue_fine(film_name: str, days_overdue, fine_rate: float):
+    """
+    Рассчитывает штраф за просрочку и индекс возврата, обрабатывая ошибки.
+
+    Args:
+        film_name (str): Название фильма.
+        days_overdue (Any): Количество дней просрочки (может быть числом или строкой).
+        fine_rate (float): Стоимость дня просрочки.
+
+    Returns:
+        tuple[float, float] | None: Кортеж (штраф, индекс) или None при ошибке.
+    """
     try:
         numeric_days = float(days_overdue)
         total_fine = numeric_days * fine_rate
@@ -16,7 +27,6 @@ def calculate_overdue_fine(film_name: str, days_overdue, fine_rate: float) -> tu
     finally:
         print("--- Проверка транзакции возврата завершена ---\n")
 
-# Тесты
 print("=== ПРОВЕРКА ВОЗВРАТОВ ===")
 test_cases = [
     ("Matrix", 5, 1.5),

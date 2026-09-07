@@ -1,29 +1,60 @@
-DEFAULT_RETURN_INDEX_BASE = 10.0
+import time
 
-def calculate_overdue_fine(film_name: str, days_overdue, fine_rate: float) -> tuple[float, float]:
-    try:
-        numeric_days = float(days_overdue)
-        total_fine = numeric_days * fine_rate
-        return_index = DEFAULT_RETURN_INDEX_BASE / numeric_days
-        print(f"Фильм: '{film_name}' | Итоговый штраф: {total_fine}$ | Индекс: {return_index}")
-        return total_fine, return_index
-    except TypeError:
-        print(f"[ОШИБКА ТИПА] Некорректный тип данных для '{film_name}': {days_overdue}")
-    except ValueError:
-        print(f"[ОШИБКА ЗНАЧЕНИЯ] Невозможно преобразовать дни в число для '{film_name}': {days_overdue}")
-    except ZeroDivisionError:
-        print(f"[ОШИБКА ДЕЛЕНИЯ НА НОЛЬ] Возврат без просрочки для '{film_name}': float division by zero")
-    finally:
-        print("--- Проверка транзакции возврата завершена ---\n")
+PERFORMANCE_LOG_PREFIX = "[PERF_LOG]"
+TIME_DECIMALS = 8
 
-# Тесты
-print("=== ПРОВЕРКА ВОЗВРАТОВ ===")
-test_cases = [
-    ("Matrix", 5, 1.5),
-    ("Inception", "пять", 2.0),
-    ("Avatar", 0, 2.5),
-    ("Interstellar", [3], 3.0)
+def performance_logger(func):
+    """
+    Декоратор для логирования времени выполнения функции.
+
+    Args:
+        func (Callable): Оборачиваемая функция.
+
+    Returns:
+        Callable: Функция-обёртка с логированием времени.
+    """
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        end = time.perf_counter()
+        duration = round(end - start, TIME_DECIMALS)
+        print(f"{PERFORMANCE_LOG_PREFIX} Функция '{func.__name__}' выполнена за {duration} сек.")
+        return result
+    return wrapper
+
+@performance_logger
+def get_sorted_report(data: list) -> list:
+    """
+    Сортирует список категорий по выручке.
+
+    Args:
+        data (list[dict[str, str | float]]): Список словарей с ключами category и total_sales.
+
+    Returns:
+        list[dict[str, str | float]]: Отсортированный список по убыванию выручки.
+    """
+    return sorted(data, key=lambda x: x["total_sales"], reverse=True)
+
+test_sets = [
+    [
+        {"category": "Action", "total_sales": 4311.85},
+        {"category": "Animation", "total_sales": 4656.30},
+        {"category": "Children", "total_sales": 3655.55}
+    ],
+    [
+        {"category": "Classics", "total_sales": 1200.10},
+        {"category": "Comedy", "total_sales": 4000.00},
+        {"category": "Documentary", "total_sales": 4000.00}
+    ],
+    [
+        {"category": "Drama", "total_sales": 500.00}
+    ]
 ]
 
-for film, days, rate in test_cases:
-    calculate_overdue_fine(film, days, rate)
+print("=== ТЕСТИРОВАНИЕ ПРОИЗВОДИТЕЛЬНОСТИ ===")
+for idx, test_data in enumerate(test_sets, start=1):
+    print(f"\n--- ТЕСТ {idx} ---")
+    sorted_data = get_sorted_report(test_data)
+    print("Топ категорий по выручке:")
+    for i, item in enumerate(sorted_data, start=1):
+        print(f"{i}. {item['category']}: {item['total_sales']}")
